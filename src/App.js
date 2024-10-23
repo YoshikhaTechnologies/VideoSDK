@@ -15,25 +15,28 @@ function JoinScreen({ getMeetingAndToken }) {
     await getMeetingAndToken(meetingId);
   };
   return (
-    <div>
-      <input
-        type="text"
-        placeholder="Enter Meeting Id"
-        onChange={(e) => {
-          setMeetingId(e.target.value);
-        }}
-      />
-      <button onClick={onClick}>Join</button>
-      {" or "}
-      <button onClick={onClick}>Create Meeting</button>
-    </div>
+      <div className="join-screen">
+        <input
+            className="meeting-input"
+            type="text"
+            placeholder="Game name"
+            onChange={(e) => {
+              setMeetingId(e.target.value);
+            }}
+        />
+        <div className="buttons">
+          <button className="btn join-btn" onClick={onClick}>Join</button>
+          <span>or</span>
+          <button className="btn create-btn" onClick={onClick}>Start Game</button>
+        </div>
+      </div>
   );
 }
 
 function ParticipantView(props) {
   const micRef = useRef(null);
   const { webcamStream, micStream, webcamOn, micOn, isLocal, displayName } =
-    useParticipant(props.participantId);
+      useParticipant(props.participantId);
 
   const videoStream = useMemo(() => {
     if (webcamOn && webcamStream) {
@@ -51,10 +54,10 @@ function ParticipantView(props) {
 
         micRef.current.srcObject = mediaStream;
         micRef.current
-          .play()
-          .catch((error) =>
-            console.error("videoElem.current.play() failed", error)
-          );
+            .play()
+            .catch((error) =>
+                console.error("videoElem.current.play() failed", error)
+            );
       } else {
         micRef.current.srcObject = null;
       }
@@ -62,43 +65,40 @@ function ParticipantView(props) {
   }, [micStream, micOn]);
 
   return (
-    <div key={props.participantId}>
-      <p>
-        Participant: {displayName} | Webcam: {webcamOn ? "ON" : "OFF"} | Mic:{" "}
-        {micOn ? "ON" : "OFF"}
-      </p>
-      <audio ref={micRef} autoPlay muted={isLocal} />
-      {webcamOn && (
-        <ReactPlayer
-          //
-          playsinline // very very imp prop
-          pip={false}
-          light={false}
-          controls={false}
-          muted={true}
-          playing={true}
-          //
-          url={videoStream}
-          //
-          height={"200px"}
-          width={"300px"}
-          onError={(err) => {
-            console.log(err, "participant video error");
-          }}
-        />
-      )}
-    </div>
+      <div className="participant-view">
+        <p>
+          <strong>Participant:</strong> {displayName} | <strong>Webcam:</strong> {webcamOn ? "ON" : "OFF"} | <strong>Mic:</strong> {micOn ? "ON" : "OFF"}
+        </p>
+        <audio ref={micRef} autoPlay muted={isLocal} />
+        {webcamOn && (
+            <ReactPlayer
+                playsinline
+                pip={false}
+                light={false}
+                controls={false}
+                muted={true}
+                playing={true}
+                url={videoStream}
+                height={"200px"}
+                width={"300px"}
+                className="participant-video"
+                onError={(err) => {
+                  console.log(err, "participant video error");
+                }}
+            />
+        )}
+      </div>
   );
 }
 
 function Controls() {
   const { leave, toggleMic, toggleWebcam } = useMeeting();
   return (
-    <div>
-      <button onClick={() => leave()}>Leave</button>
-      <button onClick={() => toggleMic()}>toggleMic</button>
-      <button onClick={() => toggleWebcam()}>toggleWebcam</button>
-    </div>
+      <div className="controls">
+        <button className="btn leave-btn" onClick={() => leave()}>Leave</button>
+        <button className="btn control-btn" onClick={() => toggleMic()}>Toggle Mic</button>
+        <button className="btn control-btn" onClick={() => toggleWebcam()}>Toggle Webcam</button>
+      </div>
   );
 }
 
@@ -119,24 +119,26 @@ function MeetingView(props) {
   };
 
   return (
-    <div className="container">
-      <h3>Meeting Id: {props.meetingId}</h3>
-      {joined && joined == "JOINED" ? (
-        <div>
-          <Controls />
-          {[...participants.keys()].map((participantId) => (
-            <ParticipantView
-              participantId={participantId}
-              key={participantId}
-            />
-          ))}
-        </div>
-      ) : joined && joined == "JOINING" ? (
-        <p>Joining the meeting...</p>
-      ) : (
-        <button onClick={joinMeeting}>Join</button>
-      )}
-    </div>
+      <div className="meeting-view">
+        <h3>Meeting Id: {props.meetingId}</h3>
+        {joined && joined === "JOINED" ? (
+            <div>
+              <Controls />
+              <div className="participants">
+                {[...participants.keys()].map((participantId) => (
+                    <ParticipantView
+                        participantId={participantId}
+                        key={participantId}
+                    />
+                ))}
+              </div>
+            </div>
+        ) : joined && joined === "JOINING" ? (
+            <p>Joining the meeting...</p>
+        ) : (
+            <button className="btn join-btn" onClick={joinMeeting}>Join</button>
+        )}
+      </div>
   );
 }
 
@@ -145,7 +147,7 @@ function App() {
 
   const getMeetingAndToken = async (id) => {
     const meetingId =
-      id == null ? await createMeeting({ token: authToken }) : id;
+        id == null ? await createMeeting({ token: authToken }) : id;
     setMeetingId(meetingId);
   };
 
@@ -154,23 +156,23 @@ function App() {
   };
 
   return authToken && meetingId ? (
-    <MeetingProvider
-      config={{
-        meetingId,
-        micEnabled: true,
-        webcamEnabled: true,
-        name: "C.V. Raman",
-      }}
-      token={authToken}
-    >
-      <MeetingConsumer>
-        {() => (
-          <MeetingView meetingId={meetingId} onMeetingLeave={onMeetingLeave} />
-        )}
-      </MeetingConsumer>
-    </MeetingProvider>
+      <MeetingProvider
+          config={{
+            meetingId,
+            micEnabled: true,
+            webcamEnabled: true,
+            name: "Spiderman",
+          }}
+          token={authToken}
+      >
+        <MeetingConsumer>
+          {() => (
+              <MeetingView meetingId={meetingId} onMeetingLeave={onMeetingLeave} />
+          )}
+        </MeetingConsumer>
+      </MeetingProvider>
   ) : (
-    <JoinScreen getMeetingAndToken={getMeetingAndToken} />
+      <JoinScreen getMeetingAndToken={getMeetingAndToken} />
   );
 }
 
